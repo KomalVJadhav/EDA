@@ -49,7 +49,7 @@ Visualizations for exploring relationships between three variables.
 ## Multivariate Data Visualization
 Visualizations for exploring relationships among multiple variables.
 
-### All Continuous or One Categorical + Continuous Variables
+### All Continuous or One Categorical + All other Continuous Variables
 - **Pair Plot**: Displays pairwise relationships across multiple continuous variables, often with scatter plots and KDE diagonals.
 
 ### All Continuous (Proportion Analysis)
