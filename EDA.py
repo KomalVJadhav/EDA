@@ -1,3 +1,8 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 def basic_eda(data):
   print('Head of data')
   display(data.head())
@@ -17,7 +22,7 @@ def basic_eda(data):
 
 
 
-#improvements : Add subplots functionality
+#improvements : Add subplots functionality, Option to select top/bottom n or given list of categories for categorical features analysis
 class Plotter:
     def __init__(self, data):
         """
@@ -406,3 +411,8 @@ class Plotter:
           plt.show()
         except Exception as e:
           print(e)
+
+# Usage Example
+# basic_eda(data)
+# plotter_obj = Plotter(data)
+# plotter_obj.histogram('Age', use_bins = False, title='Freq distribution of Age')
