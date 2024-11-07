@@ -4,6 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
+
+# improvements : Handle exceptions
 class CrossTabAnalysis:
     def __init__(self, data, index_column, column_name):
         """
