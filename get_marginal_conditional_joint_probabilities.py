@@ -8,7 +8,8 @@ class CrossTabAnalysis:
     def __init__(self, data, index_column, column_name):
         """
         Initialize with dataset, index, and column for analysis.
-
+        Usage - Both index_column and column_name have to be categorical features
+        
         Parameters:
         - data (DataFrame): The input DataFrame.
         - index_column (str): Name of the index column (e.g., 'Gender').
