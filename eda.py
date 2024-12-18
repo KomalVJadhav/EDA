@@ -1,8 +1,3 @@
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 def basic_eda(data):
   print('Head of data')
   display(data.head())
@@ -11,6 +6,7 @@ def basic_eda(data):
   print(data.shape)
   print('*************************************************************************************')
   print('Unique values in data')
+  data.drop_duplicates(inplace = True)
   display(data.nunique())
   print('*************************************************************************************')
   print('Non-Null count and datatypes of columns in data')
@@ -22,7 +18,10 @@ def basic_eda(data):
 
 
 
-#improvements : Add subplots functionality, Option to select top/bottom n or given list of categories for categorical features analysis
+# Improvements: Add subplots functionality,
+#               Option to select top/bottom n or given list of categories for categorical features analysis,
+#               Can add run_all feature that runs all the functions and gives all the graphs
+#               Exception handling
 class Plotter:
     def __init__(self, data):
         """
@@ -32,7 +31,7 @@ class Plotter:
         """
         self.data = data
 
-    def countplot(self, column, title=None, color= None, fontsize = None):
+    def countplot(self, column, title=None, color= None, fontsize = None, bar_label = False):
         """
         Creates a count plot for a specified column.
         Usage - Univariate categorical analysis
@@ -43,7 +42,9 @@ class Plotter:
         """
         try:
           plt.figure(figsize=(10, 6))
-          sns.countplot(data=self.data, x=column, order=self.data[column].value_counts().index, color=color if color else 'cornflowerblue')
+          ax=sns.countplot(data=self.data, x=column, order=self.data[column].value_counts().index, color=color if color else 'cornflowerblue')
+          if bar_label:
+            ax.bar_label(ax.containers[0])
           plt.title(title if title else f'Count Plot of {column}')
           plt.xlabel(column)
           plt.ylabel('Count')
