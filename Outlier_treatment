@@ -1,0 +1,25 @@
+def remove_outliers_iqr(df, column):
+    """
+    Removes outliers from a specific column in a DataFrame based on the 1.5*IQR method.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame containing the data.
+        column (str): The column name for which to remove outliers.
+
+    Returns:
+        pd.DataFrame: A filtered DataFrame with outliers removed.
+    """
+    # Calculate Q1 (25th percentile) and Q3 (75th percentile)
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # Define the lower and upper bounds
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    print(upper_bound)
+
+    # Filter the DataFrame to remove outliers
+    filtered_df = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+
+    return filtered_df
