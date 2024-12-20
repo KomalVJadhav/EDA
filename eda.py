@@ -30,8 +30,8 @@ class Plotter:
         - data (DataFrame): pandas DataFrame containing the data for plotting.
         """
         self.data = data
-
-    def countplot(self, column, title=None, color= None, fontsize = None, bar_label = False):
+#data[data.source_name.isin(data['source_name'].value_counts(ascending = False).reset_index()['source_name'][:10])]
+    def countplot(self, column, title=None, color= None, fontsize = None, bar_label = False, top_n = None):
         """
         Creates a count plot for a specified column.
         Usage - Univariate categorical analysis
@@ -42,7 +42,12 @@ class Plotter:
         """
         try:
           plt.figure(figsize=(10, 6))
-          ax=sns.countplot(data=self.data, x=column, order=self.data[column].value_counts().index, color=color if color else 'cornflowerblue')
+          if top_n:
+            print('Total unique values: ', self.data[column].nunique())
+            top_n_category_df = self.data[self.data[column].isin(self.data[column].value_counts(ascending = False).reset_index()[column][:top_n])]
+          else:
+            top_n_category_df = self.data
+          ax=sns.countplot(data=top_n_category_df, x=column, order=top_n_category_df[column].value_counts().index, color=color if color else 'cornflowerblue')
           if bar_label:
             ax.bar_label(ax.containers[0])
           plt.title(title if title else f'Count Plot of {column}')
@@ -53,7 +58,7 @@ class Plotter:
         except Exception as e:
           print(e)
 
-    def pieplot(self, column, title=None, startangle = 90):
+    def pieplot(self, column, title=None, startangle = 90, top_n = None):
         """
         Creates a pie plot for a specified column.
         Usage - Univariate categorical analysis
@@ -63,8 +68,15 @@ class Plotter:
         - title (str): Title for the plot.
         """
         try:
+          if top_n:
+            print('Total unique values: ', self.data[column].nunique())
+            top_categories = self.data[column].value_counts(ascending=False).index[:top_n]
+            top_n_category_df = self.data.copy()
+            top_n_category_df[column] = top_n_category_df[column].apply(lambda x: x if x in top_categories else "Other")
+          else:
+            top_n_category_df = self.data
           plt.figure(figsize=(10, 6))
-          self.data[column].value_counts().plot(kind='pie', autopct='%1.1f%%', startangle = startangle, shadow = False, wedgeprops={'edgecolor': 'black', 'linewidth':0.5})
+          top_n_category_df[column].value_counts().plot(kind='pie', autopct='%1.1f%%', startangle = startangle, shadow = False, wedgeprops={'edgecolor': 'black', 'linewidth':0.5})
           plt.title(title if title else f'Pie Plot of {column}')
           plt.ylabel('')
           plt.show()
@@ -78,7 +90,7 @@ class Plotter:
         Parameters:
         - column (str): Name of the column to plot.
         - bins (int): Number of bins for the histogram.
-        - use_bins (Bool): if bins areto be used(use for numerical data, recommended not to use for number categorical data like year)
+        - use_bins (Bool): if bins are to be used(use for numerical data, recommended not to use for number categorical data like year)
         - color (str): Color of the histogram bars.
         - title (str): Title for the plot.
         - kde (Bool) : Whether to include a kernel density estimate (KDE) plot.
@@ -176,7 +188,7 @@ class Plotter:
         except Exception as e:
           print(e)
 
-    def dodgedcountplot(self, x_column, hue,  title=None):
+    def dodgedcountplot(self, x_column, hue,  title=None, top_n = None):
         """
         Creates a dodged countplotplot between two specified columns.
         Usage - Bivariate categorical-categorical analysis
@@ -187,15 +199,20 @@ class Plotter:
         - title (str): Title for the plot.
         """
         try:
+          if top_n:
+            print(f'Total unique values for {x_column} is {self.data[x_column].nunique()} and {hue} is {self.data[hue].nunique()}')
+            top_n_category_df = self.data[(self.data[x_column].isin(self.data[x_column].value_counts(ascending = False).reset_index()[x_column][:top_n])) & (self.data[hue].isin(self.data[hue].value_counts(ascending = False).reset_index()[hue][:top_n]))]
+          else:
+            top_n_category_df = self.data
           plt.figure(figsize=(10, 6))
-          sns.countplot(data=self.data, x=x_column, hue=hue)
+          sns.countplot(data=top_n_category_df, x=x_column, hue=hue)
           plt.title(title if title else f'barplot distribution of {hue} for {x_column}')
           plt.ylabel('Count')
           plt.show()
         except Exception as e:
           print(e)
 
-    def stackedcountplot(self, x_column, hue,  title=None):
+    def stackedcountplot(self, x_column, hue,  title=None, top_n = None):
         """
         Creates a stacked countplot between two specified columns.
         Usage - Bivariate categorical-categorical analysis
@@ -206,8 +223,13 @@ class Plotter:
         - title (str): Title for the plot.
         """
         try:
+          if top_n:
+            print(f'Total unique values for {x_column} is {self.data[x_column].nunique()} and {hue} is {self.data[hue].nunique()}')
+            top_n_category_df = self.data[(self.data[x_column].isin(self.data[x_column].value_counts(ascending = False).reset_index()[x_column][:top_n])) & (self.data[hue].isin(self.data[hue].value_counts(ascending = False).reset_index()[hue][:top_n]))]
+          else:
+            top_n_category_df = self.data
           plt.figure(figsize=(10, 6))
-          data = pd.crosstab(index=self.data[x_column], columns=self.data[hue])
+          data = pd.crosstab(index=top_n_category_df[x_column], columns=top_n_category_df[hue])
           data.plot(kind='bar', stacked=True, figsize=(10, 6))
           plt.title(title if title else f'barplot distribution of {hue} for {x_column}')
           plt.xticks(rotation=90)
@@ -216,7 +238,7 @@ class Plotter:
         except Exception as e:
           print(e)
 
-    def bivariateboxplot(self, categorical_column, numerical_column, title=None, rotate_xaxis_ticks = False):
+    def bivariateboxplot(self, categorical_column, numerical_column, title=None, rotate_xaxis_ticks = False, top_n = None):
         """
         Creates a boxplot between two specified columns.
         Usage - Bivariate categorical-numerical
@@ -228,7 +250,12 @@ class Plotter:
         - rotate_xaxis_ticks (bool): Whether to rotate x-axis ticks for better readability.
         """
         try:
-          sns.boxplot(data=self.data, x=categorical_column, y=numerical_column)
+          if top_n:
+            print(f'Total unique values for {categorical_column} is {self.data[categorical_column].nunique()}')
+            top_n_category_df = self.data[self.data[categorical_column].isin(self.data[categorical_column].value_counts(ascending = False).reset_index()[categorical_column][:top_n])]
+          else:
+            top_n_category_df = self.data
+          sns.boxplot(data=top_n_category_df, x=categorical_column, y=numerical_column)
           plt.title(title if title else f'Boxplot of {numerical_column} for {categorical_column}')
           if rotate_xaxis_ticks:
             plt.xticks(rotation=90)
@@ -238,7 +265,7 @@ class Plotter:
         except Exception as e:
           print(e)
 
-    def bivariatebarplot(self, categorical_column, numerical_column, title=None, rotate_xaxis_ticks = False):
+    def bivariatebarplot(self, categorical_column, numerical_column, title=None, rotate_xaxis_ticks = False, top_n = None):
         """
         Creates a boxplot between two specified columns.
         Usage - Bivariate categorical-numerical
@@ -249,7 +276,12 @@ class Plotter:
         - title (str): Title for the plot.
         """
         try:
-          sns.barplot(data=self.data, x=categorical_column, y=numerical_column, estimator=np.mean)
+          if top_n:
+            print(f'Total unique values for {categorical_column} is {self.data[categorical_column].nunique()}')
+            top_n_category_df = self.data[self.data[categorical_column].isin(self.data[categorical_column].value_counts(ascending = False).reset_index()[categorical_column][:top_n])]
+          else:
+            top_n_category_df = self.data
+          sns.barplot(data=top_n_category_df, x=categorical_column, y=numerical_column, estimator=np.mean)
           plt.title(title if title else f'Barplot of {numerical_column} for {categorical_column}')
           if rotate_xaxis_ticks:
             plt.xticks(rotation=90)
@@ -277,7 +309,7 @@ class Plotter:
         except Exception as e:
           print(e)
 
-    def trivariatescatterplot_CNN(self, numerical_column1, numerical_column2, categorical_column, title=None):
+    def trivariatescatterplot_CNN(self, numerical_column1, numerical_column2, categorical_column, title=None, top_n = None):
         """
         Creates a scatter plot between two specified columns.
         Usage - Trivariate CNN analysis
@@ -288,8 +320,13 @@ class Plotter:
         - title (str): Title for the plot.
         """
         try:
+          if top_n:
+            print(f'Total unique values for {categorical_column} is {self.data[categorical_column].nunique()}')
+            top_n_category_df = self.data[self.data[categorical_column].isin(self.data[categorical_column].value_counts(ascending = False).reset_index()[categorical_column][:top_n])]
+          else:
+            top_n_category_df = self.data
           plt.figure(figsize=(10, 6))
-          sns.scatterplot(data=self.data, x=numerical_column1, y=numerical_column2, hue=categorical_column)
+          sns.scatterplot(data=top_n_category_df, x=numerical_column1, y=numerical_column2, hue=categorical_column)
           plt.title(title if title else f'Scatter plot of {numerical_column1} vs {numerical_column2} for {categorical_column}')
           plt.xlabel(numerical_column1)
           plt.ylabel(numerical_column2)
@@ -297,7 +334,7 @@ class Plotter:
         except Exception as e:
           print(e)
 
-    def trivariateboxplot(self, categorical_column1, categorical_column2, numerical_column, title=None, rotate_xaxis_ticks = False):
+    def trivariateboxplot(self, categorical_column1, categorical_column2, numerical_column, title=None, rotate_xaxis_ticks = False, top_n = None):
         """
         Creates a boxplot between two specified columns.
         Usage - Trivariate CCN analysis
@@ -310,8 +347,13 @@ class Plotter:
         - rotate_xaxis_ticks (bool): Whether to rotate x-axis ticks for better readability.
         """
         try:
+          if top_n:
+            print(f'Total unique values for {categorical_column1} is {self.data[categorical_column1].nunique()} and {categorical_column2} is {self.data[categorical_column2].nunique()}')
+            top_n_category_df = self.data[(self.data[categorical_column1].isin(self.data[categorical_column1].value_counts(ascending = False).reset_index()[categorical_column1][:top_n])) & (self.data[categorical_column2].isin(self.data[categorical_column2].value_counts(ascending = False).reset_index()[categorical_column2][:top_n]))]
+          else:
+            top_n_category_df = self.data
           plt.figure(figsize=(12,8))
-          sns.boxplot(x=categorical_column1,y=numerical_column,hue=categorical_column2,data=self.data)
+          sns.boxplot(x=categorical_column1,y=numerical_column,hue=categorical_column2,data=top_n_category_df)
           plt.title(title if title else f'Boxplot of {numerical_column} for {categorical_column1} and {categorical_column2}')
           if rotate_xaxis_ticks:
             plt.xticks(rotation=90)
@@ -342,7 +384,7 @@ class Plotter:
         except Exception as e:
           print(e)
 
-    def trivariatejointplot(self, numerical_column1, numerical_column2, categorical_column, title=None):
+    def trivariatejointplot(self, numerical_column1, numerical_column2, categorical_column, title=None, top_n = None):
         """
         Creates a joint plot between two specified columns.
         Usage - trivariate CNN analysis
@@ -353,13 +395,18 @@ class Plotter:
         - title (str): Title for the plot.
         """
         try:
-          sns.jointplot(x=numerical_column1, y=numerical_column2, data=self.data, hue=categorical_column)
+          if top_n:
+            print(f'Total unique values for {categorical_column} is {self.data[categorical_column].nunique()}')
+            top_n_category_df = self.data[self.data[categorical_column].isin(self.data[categorical_column].value_counts(ascending = False).reset_index()[categorical_column][:top_n])]
+          else:
+            top_n_category_df = self.data
+          sns.jointplot(x=numerical_column1, y=numerical_column2, data=top_n_category_df, hue=categorical_column)
           # plt.title(title if title else f'Joint Plot of {numerical_column1} vs {numerical_column2} for {categorical_column}')
           plt.show()
         except Exception as e:
           print(e)
 
-    def pairplot(self, columns=None, vars = None,hue=None):
+    def pairplot(self, columns=None, vars = None,hue=None, top_n = None):
         """
         Creates pair plot for multiple columns.
         Usage : Multivariate numerical analysis(one category column can be added optionally using 'hue' argument)
@@ -369,10 +416,14 @@ class Plotter:
         - hue (str): Column name to be used for color coding.
         """
         try:
-          if vars:
-            sns.pairplot(self.data, x_vars=vars['x'], y_vars=vars['y'], hue=hue)
+          if top_n:
+            top_n_category_df = self.data[self.data[hue].isin(self.data[hue].value_counts(ascending = False).reset_index()[hue][:top_n])]
           else:
-            sns.pairplot(self.data if columns is None else self.data[columns], hue=hue)
+            top_n_category_df = self.data
+          if vars:
+            sns.pairplot(top_n_category_df, x_vars=vars['x'], y_vars=vars['y'], hue=hue)
+          else:
+            sns.pairplot(top_n_category_df if columns is None else top_n_category_df[columns], hue=hue)
           plt.show()
         except Exception as e:
           print(e)
@@ -412,8 +463,3 @@ class Plotter:
           plt.show()
         except Exception as e:
           print(e)
-
-# Usage Example
-# basic_eda(data)
-# plotter_obj = Plotter(data)
-# plotter_obj.histogram('Age', use_bins = False, title='Freq distribution of Age')
