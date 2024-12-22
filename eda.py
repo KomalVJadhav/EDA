@@ -463,3 +463,25 @@ class Plotter:
           plt.show()
         except Exception as e:
           print(e)
+
+
+
+class quick_eda_obj:
+  def __init__(self, data):
+    self.data = data
+    self.plotter_obj = Plotter(data)
+
+  def univariate_analysis(self, cat_col_list=[], num_col_list=[], top_n = None):
+    """
+    Performs univariate analysis on categorical and numerical columns.
+    """
+    if cat_col_list:
+      for col in cat_col_list:
+        self.plotter_obj.countplot(column = col, bar_label = True, top_n = top_n)
+        self.plotter_obj.pieplot(column = col, startangle = 90, top_n = top_n)
+
+    if num_col_list:
+      for col in num_col_list:
+        self.plotter_obj.histogram(column = col, bins=30, use_bins = False, kde = False)
+        self.plotter_obj.kdeplot(column = col)
+        self.plotter_obj.boxplot(column = col)
