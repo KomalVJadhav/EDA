@@ -83,3 +83,8 @@ class OutlierHandler:
             self.dataframe[col] = np.where(outlier_mask, col_median, self.dataframe[col])
         return self.dataframe
 
+#Removing the outliers by clipping the data outside of the iqr range
+# OutlierHandler_obj = OutlierHandler(data)
+
+# outlier_treated_data = OutlierHandler_obj.clip_outliers(num_features, method="iqr")
+# outlier_treated_data.head(2)
